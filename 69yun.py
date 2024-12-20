@@ -99,6 +99,24 @@ def generate_config():
     print(config)
     return config
 
+# 通过接口发送消息到企微群
+def send_qwgroup_message(msg):
+    # 获取当前 UTC 时间，并转换为北京时间（+8小时）
+    now = datetime.utcnow()
+    beijing_time = now + timedelta(hours=8)
+    formatted_time = beijing_time.strftime("%Y-%m-%d %H:%M:%S")
+    # 构建消息内容
+    message_text = f"执行时间: {formatted_time}\n{msg}"
+
+    webhook_url = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=777f67ae-416c-466d-a375-f5b9e49dc090"
+    data = {
+        "msgtype": "text",
+        "text": {
+            "content": message_text
+        }
+    }
+    response = requests.post(webhook_url, json=data)
+    print(response.status_code, response.text)
 
 # 发送消息到 Telegram Bot 的函数，支持按钮
 def send_message(msg="", BotToken="", ChatID=""):
@@ -249,6 +267,9 @@ def checkin(account, domain, BotToken, ChatID):
 
         # 发送签到结果到 Telegram
         send_message(账号信息 + 用户信息 + 签到结果, BotToken, ChatID)
+        # 发送签到结果到 qw
+        send_qwgroup_message(账号信息 + 用户信息 + 签到结果);
+        
         return 签到结果
 
     except Exception as error:
